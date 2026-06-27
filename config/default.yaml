@@ -1,0 +1,105 @@
+data:
+  source: "kaggle"
+  dataset: "nelgiriyewithana/global-weather-repository"
+  date_candidates:
+    - "last_updated"
+    - "lastupdated"
+    - "Last Updated"
+    - "LastUpdated"
+    - "date"
+
+cleaning:
+  outlier_method: "iqr"
+  iqr_multiplier: 1.5
+  winsorize_lower: 0.01
+  winsorize_upper: 0.99
+  zscore_threshold: 3
+
+anomaly_detection:
+  isolation_forest:
+    contamination: 0.05
+    random_state: 42
+  zscore_threshold: 3
+
+features:
+  n_lags: 14
+  rolling_windows: [7, 14]
+  cyclical_period: 365.25
+
+models:
+  test_size: 0.2
+  random_state: 42
+
+  arima:
+    max_p: 5
+    max_q: 5
+    max_d: 2
+    seasonal: false
+    information_criterion: "aic"
+
+  sarima:
+    order: [2, 1, 1]
+    seasonal_order: [1, 1, 1, 7]
+
+  holt_winters:
+    trend: "add"
+    seasonal: "add"
+    seasonal_period: 7
+
+  ridge:
+    alpha: 1.0
+
+  random_forest:
+    n_estimators: 200
+    max_depth: 10
+
+  xgboost:
+    n_estimators: 200
+    max_depth: 6
+    learning_rate: 0.1
+
+  gradient_boosting:
+    n_estimators: 200
+    max_depth: 5
+    learning_rate: 0.1
+
+  neural_network:
+    hidden_layer_sizes: [128, 64, 32]
+    max_iter: 500
+    learning_rate_init: 0.001
+    early_stopping: true
+
+  cross_validation:
+    n_splits: 5
+    scoring: "neg_root_mean_squared_error"
+
+  tuning:
+    xgboost:
+      n_estimators: [100, 200, 300]
+      max_depth: [4, 6, 8]
+      learning_rate: [0.05, 0.1, 0.2]
+    random_forest:
+      n_estimators: [100, 200, 300]
+      max_depth: [5, 10, 15]
+      min_samples_split: [2, 5, 10]
+
+feature_importance:
+  shap_max_samples: 500
+  top_n_features: 15
+  permutation_repeats: 10
+
+climate:
+  zones:
+    tropical: 23.5
+    subtropical: 35
+    temperate: 55
+    subarctic: 66.5
+
+visualization:
+  plotly_template: "plotly_white"
+  color_palette:
+    temperature: "#e74c3c"
+    precipitation: "#3498db"
+    humidity: "#2ecc71"
+    wind: "#9b59b6"
+  figure_height: 500

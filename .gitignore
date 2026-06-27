@@ -1,0 +1,42 @@
+__pycache__/
+*.pyc
+*.pyo
+.ipynb_checkpoints/
+
+# Virtual environments
+venv/
+.venv/
+env/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Secrets
+.env
+.kaggle/
+
+# Data artifacts
+data/
+*.joblib
+
+# Experiment logs
+experiments.csv
+
+# Build / dist
+*.egg-info/
+dist/
+build/
+
+# Tool caches
+.mypy_cache/
+.ruff_cache/
+.pytest_cache/
+htmlcov/
+coverage.xml
+
+# OS
+.DS_Store
+Thumbs.db
