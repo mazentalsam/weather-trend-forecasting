@@ -71,6 +71,64 @@ st.set_page_config(
     initial_sidebar_state="expanded",
 )
 
+# ---------------------------------------------------------------------------
+# Custom styling
+# ---------------------------------------------------------------------------
+st.markdown("""
+<style>
+    /* Hide default hamburger menu & footer */
+    #MainMenu {visibility: hidden;}
+    footer {visibility: hidden;}
+
+    /* Metric cards */
+    div[data-testid="stMetric"] {
+        background: linear-gradient(135deg, #667eea11 0%, #764ba211 100%);
+        border: 1px solid #e0e0e0;
+        border-radius: 12px;
+        padding: 16px 20px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+    }
+    div[data-testid="stMetric"] label {
+        font-size: 0.85rem !important;
+        color: #555 !important;
+    }
+    div[data-testid="stMetric"] [data-testid="stMetricValue"] {
+        font-size: 1.6rem !important;
+        font-weight: 700 !important;
+    }
+
+    /* Sidebar branding */
+    section[data-testid="stSidebar"] {
+        background: linear-gradient(180deg, #1a1a2e 0%, #16213e 100%);
+    }
+    section[data-testid="stSidebar"] * {
+        color: #e0e0e0 !important;
+    }
+    section[data-testid="stSidebar"] .stRadio label:hover {
+        color: #fff !important;
+        background: rgba(255,255,255,0.08);
+        border-radius: 6px;
+    }
+
+    /* Tabs */
+    .stTabs [data-baseweb="tab"] {
+        font-weight: 600;
+    }
+
+    /* Info boxes */
+    .stAlert {
+        border-radius: 10px;
+    }
+
+    /* Headers */
+    h1 {
+        color: #1a1a2e !important;
+        border-bottom: 3px solid #667eea;
+        padding-bottom: 8px;
+    }
+</style>
+""", unsafe_allow_html=True)
+
 CFG = load_config()
 TEMPLATE = "plotly_white"
 MONTH_MAP = {1: "Jan", 2: "Feb", 3: "Mar", 4: "Apr", 5: "May", 6: "Jun",
@@ -148,7 +206,19 @@ df, cols, validation_report = get_data()
 # Page: Overview
 # ---------------------------------------------------------------------------
 if page == "📊 Overview":
-    st.title("Global Weather Trend Forecasting")
+    # Hero section
+    st.markdown("""
+    <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                padding: 2.5rem; border-radius: 16px; margin-bottom: 1.5rem;">
+        <h1 style="color: white !important; border: none; margin: 0; font-size: 2.2rem;">
+            Global Weather Trend Forecasting
+        </h1>
+        <p style="color: rgba(255,255,255,0.9); font-size: 1.15rem; margin-top: 0.5rem; margin-bottom: 0;">
+            Analyzing daily weather data from 190+ countries with 13 prediction models,
+            SHAP explainability, and interactive climate analysis.
+        </p>
+    </div>
+    """, unsafe_allow_html=True)
 
     st.info(
         "🚀 **PM Accelerator Mission** — The Product Manager Accelerator Program is "
@@ -159,19 +229,25 @@ if page == "📊 Overview":
         "[Learn more →](https://www.pmaccelerator.io)"
     )
 
-    st.markdown(
-        "This project takes daily weather data from **190+ countries**, cleans it, "
-        "explores patterns, and builds **13 different prediction models** to forecast "
-        "future temperatures. It also explains *why* predictions are made using SHAP, "
-        "and analyzes climate patterns across the globe."
-    )
-
     c1, c2, c3, c4 = st.columns(4)
     c1.metric("Records", f"{len(df):,}")
     c2.metric("Features", f"{len(df.columns)}")
     date_col_parsed = pd.to_datetime(df["date"])
     c3.metric("Date Range", f"{date_col_parsed.min().date()} → {date_col_parsed.max().date()}")
     c4.metric("Countries", f"{df[cols.country].nunique()}" if cols.country else "N/A")
+
+    st.markdown("---")
+
+    # Pipeline overview
+    st.markdown("### How This Pipeline Works")
+    p1, p2, p3, p4, p5 = st.columns(5)
+    p1.markdown("**1. Validate**\n\nSchema checks, missing values, range validation")
+    p2.markdown("**2. Clean**\n\nImpute missing, handle outliers, normalize")
+    p3.markdown("**3. Engineer**\n\nLag features, rolling stats, cyclical encoding")
+    p4.markdown("**4. Model**\n\n13 models trained & compared")
+    p5.markdown("**5. Explain**\n\nSHAP values, feature importance")
+
+    st.markdown("---")
 
     with st.expander("Data Quality Report", expanded=False):
         st.text(validation_report.summary())
@@ -182,21 +258,23 @@ if page == "📊 Overview":
             ).sort_values("Missing %", ascending=False)
             st.dataframe(missing_df, use_container_width=True, hide_index=True)
 
-    st.markdown("### Dataset Sample")
-    st.dataframe(df.head(100), use_container_width=True, height=400)
+    tab_sample, tab_stats, tab_dist = st.tabs(["Dataset Sample", "Feature Statistics", "Distributions"])
 
-    st.markdown("### Feature Statistics")
-    st.dataframe(df[cols.key_numeric].describe().round(2), use_container_width=True)
+    with tab_sample:
+        st.dataframe(df.head(100), use_container_width=True, height=400)
 
-    if cols.key_numeric:
-        st.markdown("### Distribution of Key Features")
-        sel = st.selectbox("Feature", cols.key_numeric)
-        fig = px.histogram(
-            df, x=sel, nbins=80, marginal="box",
-            title=f"Distribution of {sel}", template=TEMPLATE,
-            color_discrete_sequence=["#e74c3c"],
-        )
-        st.plotly_chart(fig, use_container_width=True)
+    with tab_stats:
+        st.dataframe(df[cols.key_numeric].describe().round(2), use_container_width=True)
+
+    with tab_dist:
+        if cols.key_numeric:
+            sel = st.selectbox("Feature", cols.key_numeric)
+            fig = px.histogram(
+                df, x=sel, nbins=80, marginal="box",
+                title=f"Distribution of {sel}", template=TEMPLATE,
+                color_discrete_sequence=["#667eea"],
+            )
+            st.plotly_chart(fig, use_container_width=True)
 
 # ---------------------------------------------------------------------------
 # Page: Exploratory Analysis
@@ -486,11 +564,19 @@ elif page == "📈 Forecasting":
         st.success(f"✅ {len(results)} models trained successfully!")
 
         results_df = pd.DataFrame([r.to_dict() for r in results]).sort_values("RMSE")
+
+        # Winner highlight
+        best = results_df.iloc[0]
+        st.markdown(f"""
+        <div style="background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+                    padding: 1.2rem 1.5rem; border-radius: 12px; margin-bottom: 1rem;">
+            <span style="color: white; font-size: 1.1rem;">
+                🏆 <b>Best Model: {best['Model']}</b> — RMSE: {best['RMSE']:.4f} | R²: {best['R²']:.4f}
+            </span>
+        </div>
+        """, unsafe_allow_html=True)
         st.markdown("### Model Comparison")
         st.dataframe(results_df, use_container_width=True, hide_index=True)
-
-        best = results_df.iloc[0]
-        st.markdown(f"**Best model: {best['Model']}** — RMSE: {best['RMSE']}, R²: {best['R²']}")
 
         st.markdown("### Model Ranking")
         fig = plot_model_ranking(results_df)
@@ -1023,6 +1109,28 @@ elif page == "💡 Key Insights":
     )
 
     st.markdown("---")
+
+    # Download report
+    report_lines = [
+        "# Weather Trend Forecasting — Key Insights Report\n",
+        f"Generated from {len(df):,} records across {df[cols.country].nunique() if cols.country else 'N/A'} countries.\n",
+        "\n## Key Takeaways\n",
+        "1. Lag features dominate — recent temperature history is the strongest predictor.",
+        "2. Rolling statistics (7/14-day) capture short-term trends that improve accuracy.",
+        "3. Cyclical sin/cos encoding preserves seasonality without year-boundary artifacts.",
+        "4. Ensemble models outperform individual models via inverse-RMSE weighting.",
+        "5. TimeSeriesSplit prevents data leakage that standard k-fold would cause.",
+        "6. Climate zones show clear 10-15°C separation between tropical and temperate.",
+        "\n---\nPM Accelerator · https://www.pmaccelerator.io",
+    ]
+    st.download_button(
+        "📥 Download Insights Report",
+        "\n".join(report_lines),
+        file_name="weather_insights_report.txt",
+        mime="text/plain",
+        use_container_width=True,
+    )
+
     st.caption(
         "Report auto-generated from data analysis · "
         "[PM Accelerator](https://www.pmaccelerator.io) · "
