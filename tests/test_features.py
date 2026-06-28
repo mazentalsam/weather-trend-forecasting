@@ -16,11 +16,11 @@ class TestCreateLagFeatures:
     def test_output_columns(self, sample_series):
         result = create_lag_features(sample_series, n_lags=7)
         assert "target" in result.columns
-        assert "lag_1" in result.columns
-        assert "lag_7" in result.columns
-        assert "rolling_mean_7" in result.columns
-        assert "sin_day" in result.columns
-        assert "cos_day" in result.columns
+        assert "Yesterday" in result.columns
+        assert "7 Days Ago" in result.columns
+        assert "Avg Temp (Last 7 Days)" in result.columns
+        assert "Season (sin)" in result.columns
+        assert "Season (cos)" in result.columns
 
     def test_no_nans(self, sample_series):
         result = create_lag_features(sample_series, n_lags=7)
@@ -33,7 +33,7 @@ class TestCreateLagFeatures:
     def test_lag_values_correct(self, sample_series):
         result = create_lag_features(sample_series, n_lags=3)
         valid_idx = result.index[0]
-        assert result.loc[valid_idx, "lag_1"] == sample_series.shift(1).loc[valid_idx]
+        assert result.loc[valid_idx, "Yesterday"] == sample_series.shift(1).loc[valid_idx]
 
 
 class TestPrepareFeatureMatrix:

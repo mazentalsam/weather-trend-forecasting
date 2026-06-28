@@ -9,21 +9,25 @@ import pandas as pd
 def create_lag_features(series: pd.Series, n_lags: int = 14) -> pd.DataFrame:
     df = pd.DataFrame({"target": series})
 
+    day_labels = {
+        1: "Yesterday", 2: "2 Days Ago", 3: "3 Days Ago",
+    }
     for i in range(1, n_lags + 1):
-        df[f"lag_{i}"] = series.shift(i)
+        label = day_labels.get(i, f"{i} Days Ago")
+        df[label] = series.shift(i)
 
     for w in (7, 14):
-        df[f"rolling_mean_{w}"] = series.rolling(w).mean()
-        df[f"rolling_std_{w}"] = series.rolling(w).std()
+        df[f"Avg Temp (Last {w} Days)"] = series.rolling(w).mean()
+        df[f"Temp Variability ({w}-Day)"] = series.rolling(w).std()
 
-    df["rolling_min_7"] = series.rolling(7).min()
-    df["rolling_max_7"] = series.rolling(7).max()
+    df["Coldest in Last 7 Days"] = series.rolling(7).min()
+    df["Hottest in Last 7 Days"] = series.rolling(7).max()
 
-    df["day_of_year"] = series.index.dayofyear
-    df["month"] = series.index.month
-    df["day_of_week"] = series.index.dayofweek
-    df["sin_day"] = np.sin(2 * np.pi * series.index.dayofyear / 365.25)
-    df["cos_day"] = np.cos(2 * np.pi * series.index.dayofyear / 365.25)
+    df["Day of Year"] = series.index.dayofyear
+    df["Month"] = series.index.month
+    df["Day of Week"] = series.index.dayofweek
+    df["Season (sin)"] = np.sin(2 * np.pi * series.index.dayofyear / 365.25)
+    df["Season (cos)"] = np.cos(2 * np.pi * series.index.dayofyear / 365.25)
 
     return df.dropna()
 
