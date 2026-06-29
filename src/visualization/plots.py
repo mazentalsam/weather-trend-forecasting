@@ -103,10 +103,11 @@ def plot_forecast_comparison(
 
 
 def plot_model_ranking(results_df: pd.DataFrame) -> go.Figure:
+    err_col = "Error Size (RMSE)" if "Error Size (RMSE)" in results_df.columns else "RMSE"
     fig = px.bar(
-        results_df, x="RMSE", y="Model", orientation="h",
-        color="RMSE", color_continuous_scale="RdYlGn_r",
-        title="Model Ranking by RMSE (lower = better)",
+        results_df, x=err_col, y="Model", orientation="h",
+        color=err_col, color_continuous_scale="RdYlGn_r",
+        title="Model Ranking by Prediction Error (lower = better)",
     )
     fig.update_layout(
         yaxis={"categoryorder": "total descending"},

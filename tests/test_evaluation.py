@@ -27,10 +27,10 @@ class TestEvaluateForecast:
         pred = pd.Series([1.1, 2.2, 2.8])
         d = evaluate_forecast(actual, pred, "test").to_dict()
         assert "Model" in d
-        assert "MAE" in d
-        assert "RMSE" in d
-        assert "MAPE (%)" in d
-        assert "R²" in d
+        assert "Avg Error (°C)" in d
+        assert "Error Size (RMSE)" in d
+        assert "Error % (MAPE)" in d
+        assert "Accuracy (R²)" in d
 
 
 class TestComputePredictionInterval:

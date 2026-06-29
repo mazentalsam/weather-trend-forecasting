@@ -20,10 +20,10 @@ class ForecastMetrics:
     def to_dict(self) -> dict:
         return {
             "Model": self.model,
-            "MAE": round(self.mae, 4),
-            "RMSE": round(self.rmse, 4),
-            "MAPE (%)": round(self.mape, 4),
-            "R²": round(self.r2, 4),
+            "Avg Error (°C)": round(self.mae, 4),
+            "Error Size (RMSE)": round(self.rmse, 4),
+            "Error % (MAPE)": round(self.mape, 4),
+            "Accuracy (R²)": round(self.r2, 4),
         }
 
 

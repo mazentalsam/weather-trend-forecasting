@@ -563,7 +563,7 @@ elif page == "📈 Forecasting":
         # -- Display Results --
         st.success(f"✅ {len(results)} models trained successfully!")
 
-        results_df = pd.DataFrame([r.to_dict() for r in results]).sort_values("RMSE")
+        results_df = pd.DataFrame([r.to_dict() for r in results]).sort_values("Error Size (RMSE)")
 
         # Winner highlight
         best = results_df.iloc[0]
@@ -571,7 +571,7 @@ elif page == "📈 Forecasting":
         <div style="background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
                     padding: 1.2rem 1.5rem; border-radius: 12px; margin-bottom: 1rem;">
             <span style="color: white; font-size: 1.1rem;">
-                🏆 <b>Best Model: {best['Model']}</b> — RMSE: {best['RMSE']:.4f} | R²: {best['R²']:.4f}
+                🏆 <b>Best Model: {best['Model']}</b> — Error: {best['Error Size (RMSE)']:.4f}°C | Accuracy: {best['Accuracy (R²)']:.4f}
             </span>
         </div>
         """, unsafe_allow_html=True)
@@ -602,11 +602,15 @@ elif page == "📈 Forecasting":
             from scipy import stats as sp_stats
 
             col1, col2, col3, col4 = st.columns(4)
-            col1.metric("Mean", f"{resid.mean():.4f}°C")
-            col2.metric("Std", f"{resid.std():.4f}°C")
-            col3.metric("Skewness", f"{resid.skew():.4f}")
+            col1.metric("Avg Error", f"{resid.mean():.4f}°C",
+                         help="Average prediction error — closer to 0 is better")
+            col2.metric("Error Spread", f"{resid.std():.4f}°C",
+                         help="How much errors vary — lower means more consistent")
+            col3.metric("Error Symmetry", f"{resid.skew():.4f}",
+                         help="0 = errors are balanced; positive = model underpredicts more")
             shapiro_p = sp_stats.shapiro(resid[:min(5000, len(resid))])[1]
-            col4.metric("Shapiro-Wilk p", f"{shapiro_p:.4f}")
+            col4.metric("Normality (p-value)", f"{shapiro_p:.4f}",
+                         help="If > 0.05, errors follow a normal bell curve (good)")
 
             st.plotly_chart(plot_residual_diagnostics(resid), use_container_width=True)
 
@@ -1081,8 +1085,9 @@ elif page == "💡 Key Insights":
         st.markdown("#### Leaderboard")
         display_cols = ["model_name", "rmse", "mae", "mape", "r2"]
         display = latest[display_cols].rename(columns={
-            "model_name": "Model", "rmse": "RMSE", "mae": "MAE",
-            "mape": "MAPE (%)", "r2": "R²",
+            "model_name": "Model", "rmse": "Error Size (RMSE)",
+            "mae": "Avg Error (°C)", "mape": "Error % (MAPE)",
+            "r2": "Accuracy (R²)",
         })
         st.dataframe(display, use_container_width=True, hide_index=True)
     else:
